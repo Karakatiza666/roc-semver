@@ -58,7 +58,7 @@ Example: `1.2.3` has the key `0x100020003ffff`, and `1.2.3-beta1` has `0x1000200
 Add the release to the header of your app, package or platform:
 
 ```roc
-semver: "https://github.com/Karakatiza666/roc-semver/releases/download/0.1.0/KFKmXaroJeaPkQmAaqm83fTP9yhnEkTQwE97a5BtFSX.tar.zst",
+semver: "https://github.com/Karakatiza666/roc-semver/releases/download/0.2.0/BzgH68Q1yBkg7F1ZpFsiEg73ZwkaBrFdcLpX2pUkay9i.tar.zst",
 ```
 
 Then:
