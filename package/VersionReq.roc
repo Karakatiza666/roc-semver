@@ -83,6 +83,18 @@ VersionReq :: { comparators : List(Comparator) }.{
 	to_str : VersionReq -> Str
 	to_str = |req| Str.join_with(req.comparators.map(Comparator.to_str), ", ")
 
+	## Bounds on the keys (`Semver.to_key`) of the versions that match the requirement, for a range query in SQL.
+	## Each version that matches has its key in `lo` to `hi`. A key in the bounds does not always match: check each row with `matches`.
+	key_bounds : VersionReq -> { lo : U64, hi : U64 }
+	key_bounds = |req|
+		req.comparators.fold(
+			{ lo: 0, hi: U64.highest },
+			|bounds, c| {
+				lo: bounds.lo.max(bound_key(c.lower_bound())),
+				hi: bounds.hi.min(bound_key(c.upper_bound())),
+			},
+		)
+
 	## True when the version is in the requirement.
 	matches : VersionReq, Semver -> Bool
 	matches = |req, version| {
@@ -91,6 +103,15 @@ VersionReq :: { comparators : List(Comparator) }.{
 		version.pre_release().is_empty() and req.comparators.all(|c| c.accepts(release))
 	}
 }
+
+## The key of the release version at a bound of a comparator. `End` is after each version, so its key is the largest.
+## A matching version has a key not below the key of the lower bound and not above the key of the upper bound.
+bound_key : [At(U64, U64, U64), End] -> U64
+bound_key = |bound|
+	match bound {
+		At(major, minor, patch) => Semver.new(major, minor, patch).to_key().key
+		End => U64.highest
+	}
 
 max_comparators : U64
 max_comparators = 32

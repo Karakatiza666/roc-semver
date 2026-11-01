@@ -45,6 +45,14 @@ Comparator :: {
 	to_str : Comparator -> Str
 	to_str = |c| c.text
 
+	## The first release version of the interval (inclusive). `End` when no version is at or after it.
+	lower_bound : Comparator -> [At(U64, U64, U64), End]
+	lower_bound = |c| c.lower
+
+	## The end of the interval (exclusive). `End` when it is after each version.
+	upper_bound : Comparator -> [At(U64, U64, U64), End]
+	upper_bound = |c| c.upper
+
 	## True when the release version (major, minor, patch) is in the interval.
 	accepts : Comparator, (U64, U64, U64) -> Bool
 	accepts = |c, v| at_or_after(v, c.lower) and before(v, c.upper)

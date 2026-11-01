@@ -89,6 +89,35 @@ Semver :: {
 			other => other
 		}
 
+	## The 64-bit order key of the version (Talon registry R-IK5), and whether the key alone gives the version back.
+	## Layout, high to low: major 16 bits, minor 16, patch 16, pre-release code 16.
+	## Monotone: when `a` comes before `b` by `order_relative_to`, `a.to_key().key <= b.to_key().key`.
+	## `exact` is True when each of major, minor and patch is below 0xFFFF and the version has no pre-release and no build metadata.
+	to_key : Semver -> { key : U64, exact : Bool }
+	to_key = |v| {
+		major = v.major.min(field_max)
+		minor = saturated_after(major, v.minor)
+		patch = saturated_after(minor, v.patch)
+		code = if patch == field_max field_max else pre_release_code(v.pre_release)
+		key = major.shl_wrap(48).bitwise_or(minor.shl_wrap(32)).bitwise_or(patch.shl_wrap(16)).bitwise_or(code)
+		{ key, exact: patch != field_max and v.pre_release.is_empty() and v.build.is_empty() }
+	}
+
+	## The release version of a key: the pre-release code is 0xFFFF and major, minor and patch are below 0xFFFF.
+	## Each other key gives `Err(NotExact)`. The key of an exact version gives that version.
+	from_key : U64 -> Try(Semver, [NotExact])
+	from_key = |key| {
+		major = key.shr_zf_wrap(48)
+		minor = key.shr_zf_wrap(32).bitwise_and(field_max)
+		patch = key.shr_zf_wrap(16).bitwise_and(field_max)
+		code = key.bitwise_and(field_max)
+		if code == field_max and major < field_max and minor < field_max and patch < field_max {
+			Ok(Semver.new(major, minor, patch))
+		} else {
+			Err(NotExact)
+		}
+	}
+
 	major : Semver -> U64
 	major = |v| v.major
 
@@ -106,6 +135,47 @@ Semver :: {
 	build : Semver -> List(Str)
 	build = |v| v.build
 }
+
+## The largest value of a 16-bit field of the key. It also means a saturated part, and no pre-release.
+field_max : U64
+field_max = 0xFFFF
+
+## The field of a part. A part of `field_max` or more gives `field_max`, and so does each part after it.
+saturated_after : U64, U64 -> U64
+saturated_after = |previous, part| if previous == field_max field_max else part.min(field_max)
+
+## The 16-bit pre-release code of the key, from the first identifier (R-IK5):
+## no pre-release `field_max`, numeric `0x0001 + min(n, 0x0FFE)`, other `0x1000 + 65 * rank(c1) + rank(c2)`.
+pre_release_code : List(Str) -> U64
+pre_release_code = |identifiers|
+	match identifiers {
+		[] => field_max
+		[first, ..] => {
+			chars = first.to_utf8()
+			if chars.all(Lex.is_digit) {
+				1 + chars.fold(0, |n, digit| (n * 10 + (digit - '0').to_u64()).min(0x0FFE))
+			} else {
+				0x1000 + 65 * char_rank(chars.get(0)) + char_rank(chars.get(1))
+			}
+		}
+	}
+
+## The place of a character of an identifier in ASCII order: none 0, `-` 1, digits 2 to 11, `A` to `Z` 12 to 37, `a` to `z` 38 to 63.
+char_rank : Try(U8, [OutOfBounds]) -> U64
+char_rank = |char|
+	match char {
+		Err(OutOfBounds) => 0
+		Ok(c) =>
+			if c == '-' {
+				1
+			} else if c <= '9' {
+				2 + (c - '0').to_u64()
+			} else if c <= 'Z' {
+				12 + (c - 'A').to_u64()
+			} else {
+				38 + (c - 'a').to_u64()
+			}
+	}
 
 after_byte : List(U8), U8 -> Try(List(U8), [ByteNotFound])
 after_byte = |bytes, byte|
