@@ -21,7 +21,7 @@ Semver :: {
 
 	## The release version `major.minor.patch`, with no pre-release and no build metadata.
 	new : U64, U64, U64 -> Semver
-	new = |major, minor, patch| { major, minor, patch, pre_release: [], build: [] }
+	new = |maj, mnr, pat| { major: maj, minor: mnr, patch: pat, pre_release: [], build: [] }
 
 	## Reads a version such as `1.2.3-alpha.1+build.5`. The text must have no other characters.
 	parse : Str -> Try(
@@ -62,22 +62,22 @@ Semver :: {
 			Err(EmptySemver)
 		} else {
 			b0 = text.to_utf8()
-			(major, b1) = Lex.number(b0) ? InvalidMajorVersion
+			(maj, b1) = Lex.number(b0) ? InvalidMajorVersion
 			b2 = after_byte(b1, '.') ? |_| NoPeriodAfterMajorVersion
-			(minor, b3) = Lex.number(b2) ? InvalidMinorVersion
+			(mnr, b3) = Lex.number(b2) ? InvalidMinorVersion
 			b4 = after_byte(b3, '.') ? |_| NoPeriodAfterMinorVersion
-			(patch, b5) = Lex.number(b4) ? InvalidPatchVersion
-			(pre_release, b6) = optional(b5, '-', Lex.pre_release) ? InvalidPreRelease
-			(build, b7) = optional(b6, '+', Lex.build) ? InvalidBuild
-			Ok(({ major, minor, patch, pre_release, build }, Lex.as_str(b7)))
+			(pat, b5) = Lex.number(b4) ? InvalidPatchVersion
+			(pre, b6) = optional(b5, '-', Lex.pre_release) ? InvalidPreRelease
+			(bld, b7) = optional(b6, '+', Lex.build) ? InvalidBuild
+			Ok(({ major: maj, minor: mnr, patch: pat, pre_release: pre, build: bld }, Lex.as_str(b7)))
 		}
 
 	## The text form: `major.minor.patch`, then `-` and the pre-release identifiers, then `+` and the build identifiers.
 	to_str : Semver -> Str
 	to_str = |v| {
 		pre = if v.pre_release.is_empty() "" else "-${Str.join_with(v.pre_release, ".")}"
-		build = if v.build.is_empty() "" else "+${Str.join_with(v.build, ".")}"
-		"${v.major.to_str()}.${v.minor.to_str()}.${v.patch.to_str()}${pre}${build}"
+		bld = if v.build.is_empty() "" else "+${Str.join_with(v.build, ".")}"
+		"${v.major.to_str()}.${v.minor.to_str()}.${v.patch.to_str()}${pre}${bld}"
 	}
 
 	## Precedence (semver section 11). Build metadata has no effect (semver section 10).
@@ -95,24 +95,24 @@ Semver :: {
 	## `exact` is True when each of major, minor and patch is below 0xFFFF and the version has no pre-release and no build metadata.
 	to_key : Semver -> { key : U64, exact : Bool }
 	to_key = |v| {
-		major = v.major.min(field_max)
-		minor = saturated_after(major, v.minor)
-		patch = saturated_after(minor, v.patch)
-		code = if patch == field_max field_max else pre_release_code(v.pre_release)
-		key = major.shl_wrap(48).bitwise_or(minor.shl_wrap(32)).bitwise_or(patch.shl_wrap(16)).bitwise_or(code)
-		{ key, exact: patch != field_max and v.pre_release.is_empty() and v.build.is_empty() }
+		maj = v.major.min(field_max)
+		mnr = saturated_after(maj, v.minor)
+		pat = saturated_after(mnr, v.patch)
+		code = if pat == field_max field_max else pre_release_code(v.pre_release)
+		key = maj.shl_wrap(48).bitwise_or(mnr.shl_wrap(32)).bitwise_or(pat.shl_wrap(16)).bitwise_or(code)
+		{ key, exact: pat != field_max and v.pre_release.is_empty() and v.build.is_empty() }
 	}
 
 	## The release version of a key: the pre-release code is 0xFFFF and major, minor and patch are below 0xFFFF.
 	## Each other key gives `Err(NotExact)`. The key of an exact version gives that version.
 	from_key : U64 -> Try(Semver, [NotExact])
 	from_key = |key| {
-		major = key.shr_zf_wrap(48)
-		minor = key.shr_zf_wrap(32).bitwise_and(field_max)
-		patch = key.shr_zf_wrap(16).bitwise_and(field_max)
+		maj = key.shr_zf_wrap(48)
+		mnr = key.shr_zf_wrap(32).bitwise_and(field_max)
+		pat = key.shr_zf_wrap(16).bitwise_and(field_max)
 		code = key.bitwise_and(field_max)
-		if code == field_max and major < field_max and minor < field_max and patch < field_max {
-			Ok(Semver.new(major, minor, patch))
+		if code == field_max and maj < field_max and mnr < field_max and pat < field_max {
+			Ok(Semver.new(maj, mnr, pat))
 		} else {
 			Err(NotExact)
 		}
