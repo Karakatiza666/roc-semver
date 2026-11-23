@@ -1,5 +1,5 @@
 app [target] {
-	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.4.3/41NK5FShyGC9Z8HNpUdUeXMWwLmLNfFxsfmLvdPL4Fxb.tar.zst",
+	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.7.0/HBigHQhVZWEF2EkLxpYK35u8P6UNsAmPYxpNFTxXK1Br.tar.zst",
 	pkg: "../package/main.roc",
 }
 
@@ -17,6 +17,9 @@ import pkg.VersionReq
 # Release versions only: a range does not match a pre-release version (Q6 settled, L0 T-VR45).
 
 Input := { range : List(U64), version : List(U64) }.{
+	parser_for : _
+	encoder_for : _
+
 	generator_for : Fuzz.FuzzEncoding -> Fuzz.Generator(Input)
 	generator_for = |_| { range: Fuzz.list(Fuzz.u64_in(0, 3), 3), version: Fuzz.list(Fuzz.u64_in(0, 3), 3) }.Fuzz
 }
@@ -67,6 +70,7 @@ test = |input| {
 }
 
 target = Fuzz.target_with({
+	examples: [],
 	name: "req-caret",
 	generator: Input.generator_for(Default),
 	test,

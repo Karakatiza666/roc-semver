@@ -129,7 +129,7 @@ jobs:
             echo "::group::$target"
             if roc build --fuzz "$target.roc" \
               && "./$target" run --runs="$FUZZ_RUNS" --seed="$FUZZ_SEED" --time=0 \
-                --artifact-dir="$ARTIFACT_ROOT/$target"; then
+                --report-dir="$ARTIFACT_ROOT/$target"; then
               echo "::endgroup::"
             else
               echo "::endgroup::"

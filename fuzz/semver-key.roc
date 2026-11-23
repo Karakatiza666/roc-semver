@@ -1,5 +1,5 @@
 app [target] {
-	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.4.3/41NK5FShyGC9Z8HNpUdUeXMWwLmLNfFxsfmLvdPL4Fxb.tar.zst",
+	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.7.0/HBigHQhVZWEF2EkLxpYK35u8P6UNsAmPYxpNFTxXK1Br.tar.zst",
 	pkg: "../package/main.roc",
 }
 
@@ -30,6 +30,9 @@ field_pool : List(U64)
 field_pool = [0, 1, 2, 0x0fff, 0x1000, 0x19d7, 0x203e, 0x203f, 0xfffe, 0xffff]
 
 Input := { bytes : List(U8), raw : U64 }.{
+	parser_for : _
+	encoder_for : _
+
 	generator_for : Fuzz.FuzzEncoding -> Fuzz.Generator(Input)
 	generator_for = |_| { bytes: Fuzz.list(Fuzz.u8, 40), raw: Fuzz.u64 }.Fuzz
 }
@@ -158,6 +161,7 @@ test = |input| {
 }
 
 target = Fuzz.target_with({
+	examples: [],
 	name: "semver-key",
 	generator: Input.generator_for(Default),
 	test,

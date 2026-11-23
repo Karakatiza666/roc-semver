@@ -34,10 +34,10 @@ for f in fuzz/*.roc; do
 	if ! "$FUZZ_ROC" build --fuzz "$f" --output="$W/fuzz/$n" >"$W/fuzz/$n.build.log" 2>&1; then
 		rc 1 "build $f (see $W/fuzz/$n.build.log)"; continue
 	fi
-	rm -rf "$W/fuzz/art-$n"
-	"$W/fuzz/$n" run --runs="$RUNS" --seed=1 --time=0 --artifact-dir="$W/fuzz/art-$n" >"$W/fuzz/$n.log" 2>&1
+	rm -rf "$W/fuzz/rep-$n"
+	"$W/fuzz/$n" run --runs="$RUNS" --seed=1 --time=0 --report-dir="$W/fuzz/rep-$n" >"$W/fuzz/$n.log" 2>&1
 	r=$?; rc $r "fuzz $n (see $W/fuzz/$n.log)"
-	[ $r = 0 ] && grep -m1 '^Done' "$W/fuzz/$n.log"
+	[ $r = 0 ] && grep -m1 'exploration' "$W/fuzz/$n.log"
 done
 
 echo; [ $FAIL = 0 ] && echo "ALL PASS" || { echo "SOME CHECKS FAIL"; exit 1; }

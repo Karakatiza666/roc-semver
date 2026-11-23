@@ -1,5 +1,5 @@
 app [target] {
-	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.4.3/41NK5FShyGC9Z8HNpUdUeXMWwLmLNfFxsfmLvdPL4Fxb.tar.zst",
+	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.7.0/HBigHQhVZWEF2EkLxpYK35u8P6UNsAmPYxpNFTxXK1Br.tar.zst",
 	pkg: "../package/main.roc",
 }
 
@@ -24,6 +24,9 @@ op_pool : List(Str)
 op_pool = ["", "^", "~", "=", ">", ">=", "<", "<="]
 
 Input := { req : List(U8), ver : List(U8) }.{
+	parser_for : _
+	encoder_for : _
+
 	generator_for : Fuzz.FuzzEncoding -> Fuzz.Generator(Input)
 	generator_for = |_| { req: Fuzz.list(Fuzz.u8, 12), ver: Fuzz.list(Fuzz.u8, 3) }.Fuzz
 }
@@ -81,6 +84,7 @@ test = |input| {
 }
 
 target = Fuzz.target_with({
+	examples: [],
 	name: "req-key-bounds",
 	generator: Input.generator_for(Default),
 	test,

@@ -1,5 +1,5 @@
 app [target] {
-	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.4.3/41NK5FShyGC9Z8HNpUdUeXMWwLmLNfFxsfmLvdPL4Fxb.tar.zst",
+	fuzz: platform "https://github.com/lukewilliamboswell/roc-fuzz/releases/download/0.7.0/HBigHQhVZWEF2EkLxpYK35u8P6UNsAmPYxpNFTxXK1Br.tar.zst",
 	pkg: "../package/main.roc",
 }
 
@@ -15,6 +15,9 @@ alphabet : List(U8)
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-".to_utf8()
 
 Input := { major : U64, minor : U64, patch : U64, pre : List(List(U8)), build : List(List(U8)) }.{
+	parser_for : _
+	encoder_for : _
+
 	generator_for : Fuzz.FuzzEncoding -> Fuzz.Generator(Input)
 	generator_for = |_| {
 		major: Fuzz.u64,
@@ -67,6 +70,7 @@ test = |input| {
 }
 
 target = Fuzz.target_with({
+	examples: [],
 	name: "semver-roundtrip",
 	generator: Input.generator_for(Default),
 	test,
