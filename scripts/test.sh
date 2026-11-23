@@ -8,6 +8,8 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 ROC=${1:-roc}
 FUZZ_ROC=${2:-$ROC}
 RUNS=${RUNS:-100000}
+# The time limit of one fuzz run in seconds: a run that reaches it ends and passes (roc-fuzz 0.7.0).
+FUZZ_TIME=${FUZZ_TIME:-120}
 W=$ROOT/.work
 mkdir -p "$W/fuzz"
 # No `..` in these paths: roc stops with PathOutsideWorkspace.
@@ -35,7 +37,7 @@ for f in fuzz/*.roc; do
 		rc 1 "build $f (see $W/fuzz/$n.build.log)"; continue
 	fi
 	rm -rf "$W/fuzz/rep-$n"
-	"$W/fuzz/$n" run --runs="$RUNS" --seed=1 --time=0 --report-dir="$W/fuzz/rep-$n" >"$W/fuzz/$n.log" 2>&1
+	"$W/fuzz/$n" run --runs="$RUNS" --seed=1 --time="$FUZZ_TIME" --report-dir="$W/fuzz/rep-$n" >"$W/fuzz/$n.log" 2>&1
 	r=$?; rc $r "fuzz $n (see $W/fuzz/$n.log)"
 	[ $r = 0 ] && grep -m1 'exploration' "$W/fuzz/$n.log"
 done
