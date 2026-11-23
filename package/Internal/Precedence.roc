@@ -23,7 +23,7 @@ Precedence :: [].{
 }
 
 then_order : [Before, Same, After], ({} -> [Before, Same, After]) -> [Before, Same, After]
-then_order = |first, next| if first == Same next({}) else first
+then_order = |first, next| if (first == Same) next({}) else first
 
 ## The first identifier that differs decides. If all common identifiers are equal, more identifiers is after (semver 11.4.4).
 order_identifier_lists : List(Str), List(Str) -> [Before, Same, After]
@@ -58,5 +58,5 @@ order_bytes = |a, b|
 		([], []) => Same
 		([], _) => Before
 		(_, []) => After
-		([x, .. as xs], [y, .. as ys]) => if x == y order_bytes(xs, ys) else x.order_relative_to(y)
+		([x, .. as xs], [y, .. as ys]) => if (x == y) order_bytes(xs, ys) else x.order_relative_to(y)
 	}

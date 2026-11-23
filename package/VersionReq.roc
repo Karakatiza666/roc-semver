@@ -50,7 +50,7 @@ VersionReq :: { comparators : List(Comparator) }.{
 	)
 	parse = |text| {
 		(req, rest) = VersionReq.parse_lazy(text)?
-		if rest.is_empty() Ok(req) else Err(UnexpectedSuffix(rest))
+		if (rest.is_empty()) Ok(req) else Err(UnexpectedSuffix(rest))
 	}
 
 	## Reads a requirement at the start of the text, and gives the text after it.

@@ -87,7 +87,7 @@ resolve = |op, parts, wild|
 		Bare =>
 			match parts {
 				Patch(_, _, _, _) => Eq
-				_ => if wild Eq else Caret
+				_ => if (wild) Eq else Caret
 			}
 	}
 
@@ -197,7 +197,7 @@ next = |parts|
 		Any => End
 		Major(ma) => after_major(ma)
 		Minor(ma, mi) => after_minor(ma, mi)
-		Patch(ma, mi, pa, has_pre) => if has_pre At(ma, mi, pa) else after_patch(ma, mi, pa)
+		Patch(ma, mi, pa, has_pre) => if (has_pre) At(ma, mi, pa) else after_patch(ma, mi, pa)
 	}
 
 ## `~` allows patch updates, and minor updates when only the major is given.
@@ -216,7 +216,7 @@ caret_upper = |parts|
 	match parts {
 		Any => End
 		Major(ma) => after_major(ma)
-		Minor(ma, mi) => if ma > 0 after_major(ma) else after_minor(0, mi)
+		Minor(ma, mi) => if (ma > 0) after_major(ma) else after_minor(0, mi)
 		Patch(ma, mi, pa, _) =>
 			if ma > 0 {
 				after_major(ma)
@@ -229,13 +229,13 @@ caret_upper = |parts|
 
 ## The successors carry past U64 max, so an upper bound past U64 max is `End` (Q10).
 after_major : U64 -> Bound
-after_major = |ma| if ma == U64.highest End else At(ma + 1, 0, 0)
+after_major = |ma| if (ma == U64.highest) End else At(ma + 1, 0, 0)
 
 after_minor : U64, U64 -> Bound
-after_minor = |ma, mi| if mi == U64.highest after_major(ma) else At(ma, mi + 1, 0)
+after_minor = |ma, mi| if (mi == U64.highest) after_major(ma) else At(ma, mi + 1, 0)
 
 after_patch : U64, U64, U64 -> Bound
-after_patch = |ma, mi, pa| if pa == U64.highest after_minor(ma, mi) else At(ma, mi, pa + 1)
+after_patch = |ma, mi, pa| if (pa == U64.highest) after_minor(ma, mi) else At(ma, mi, pa + 1)
 
 at_or_after : (U64, U64, U64), Bound -> Bool
 at_or_after = |v, bound|

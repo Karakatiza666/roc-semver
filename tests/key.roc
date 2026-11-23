@@ -166,15 +166,15 @@ expect {
 	exact_of = |text| ver(text).to_key().exact
 	exact_of("0.0.0")
 		and exact_of("1.2.3")
-			and exact_of("65534.65534.65534")
-				and !exact_of("1.2.3+b")
-					and !exact_of("1.2.3-0")
-						and !exact_of("1.2.3-alpha")
-							and !exact_of("1.2.3-alpha+b")
-								and !exact_of("65535.0.0")
-									and !exact_of("0.65535.0")
-										and !exact_of("0.0.65535")
-											and !exact_of("0.0.18446744073709551615")
+		and exact_of("65534.65534.65534")
+		and !exact_of("1.2.3+b")
+		and !exact_of("1.2.3-0")
+		and !exact_of("1.2.3-alpha")
+		and !exact_of("1.2.3-alpha+b")
+		and !exact_of("65535.0.0")
+		and !exact_of("0.65535.0")
+		and !exact_of("0.0.65535")
+		and !exact_of("0.0.18446744073709551615")
 }
 
 # T-K8 (R-IK5, semver 10): build metadata has no effect on the key
@@ -216,8 +216,8 @@ expect {
 expect {
 	Semver.order_relative_to(ver("0.6.65534-0.0"), ver("0.6.65534-A")) == Before
 		and key_of("0.6.65534-0.0") == 0x6fffe0001
-			and key_of("0.6.65534-0.0") < key_of("0.6.65534-A")
-				and key_of("1.0.0-99999") < key_of("1.0.0--")
+		and key_of("0.6.65534-0.0") < key_of("0.6.65534-A")
+		and key_of("1.0.0-99999") < key_of("1.0.0--")
 }
 
 # T-K14 (R-IK5 layout, S1 mutation "nosat", S4): a part of 0xFFFF or more saturates the fields after it, so the key
@@ -225,7 +225,7 @@ expect {
 expect {
 	Semver.order_relative_to(ver("65536.8.0-b.-"), ver("4294967295.0.0-99999.beta")) == Before
 		and key_of("65536.8.0-b.-") <= key_of("4294967295.0.0-99999.beta")
-			and key_of("0.65536.9") <= key_of("0.4294967295.0-beta")
+		and key_of("0.65536.9") <= key_of("0.4294967295.0-beta")
 }
 
 # T-K15 (R-IK5 property 1, S1): 37 versions in strict precedence order with the edges 0xFFFE, 0xFFFF, 0x10000, U64 max,
@@ -330,7 +330,7 @@ expect {
 expect {
 	req("^1.2.3").key_bounds() == { lo: 0x100020003ffff, hi: 0x200000000ffff }
 		and req("^0.2.3").key_bounds() == { lo: 0x20003ffff, hi: 0x30000ffff }
-			and req("^0.0.3").key_bounds() == { lo: 0x3ffff, hi: 0x4ffff }
+		and req("^0.0.3").key_bounds() == { lo: 0x3ffff, hi: 0x4ffff }
 }
 
 ## All range forms of the README, with the edge values of the key (0xFFFE, 0xFFFF, 0x10000, U64 max), and ranges that match nothing

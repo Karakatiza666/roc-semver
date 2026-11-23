@@ -40,7 +40,7 @@ comparator_at = |bytes, offset| {
 	b = |i| at(bytes, offset + i)
 	op = pick(op_pool, b(0))
 	parts = [pick(part_pool, b(2)), pick(part_pool, b(3)), pick(part_pool, b(4))].take_first(1 + b(1) % 3).map(U64.to_str)
-	wild = if parts.len() < 3 and b(1) % 7 == 3 ".x" else ""
+	wild = if (parts.len() < 3 and b(1) % 7 == 3) ".x" else ""
 	"${op}${Str.join_with(parts, ".")}${wild}"
 }
 

@@ -53,7 +53,7 @@ spec_at = |bytes, offset| {
 		minor: pick(part_pool, b(1)),
 		patch: pick(part_pool, b(2)),
 		pre,
-		build: if b(7) % 3 == 0 ["b${(b(8) % 3).to_str()}"] else [],
+		build: if (b(7) % 3 == 0) ["b${(b(8) % 3).to_str()}"] else [],
 	}
 }
 
@@ -61,19 +61,19 @@ spec_at = |bytes, offset| {
 near : Spec, List(U8) -> Spec
 near = |a, bytes| {
 	b = |i| at(bytes, 20 + i)
-	new_part = |old| if b(2) % 3 == 0 old.plus_saturated(b(3) % 3) else pick(part_pool, b(3))
+	new_part = |old| if (b(2) % 3 == 0) old.plus_saturated(b(3) % 3) else pick(part_pool, b(3))
 	match b(1) % 4 {
 		0 => { ..a, build: [], major: new_part(a.major) }
 		1 => { ..a, build: [], minor: new_part(a.minor) }
 		2 => { ..a, build: [], patch: new_part(a.patch) }
-		_ => { ..a, build: [], pre: if b(2) % 2 == 0 [] else [pick(id_pool, b(3))] }
+		_ => { ..a, build: [], pre: if (b(2) % 2 == 0) [] else [pick(id_pool, b(3))] }
 	}
 }
 
 text_of : Spec -> Str
 text_of = |s| {
-	pre = if s.pre.is_empty() "" else "-${Str.join_with(s.pre, ".")}"
-	build = if s.build.is_empty() "" else "+${Str.join_with(s.build, ".")}"
+	pre = if (s.pre.is_empty()) "" else "-${Str.join_with(s.pre, ".")}"
+	build = if (s.build.is_empty()) "" else "+${Str.join_with(s.build, ".")}"
 	"${s.major.to_str()}.${s.minor.to_str()}.${s.patch.to_str()}${pre}${build}"
 }
 
@@ -118,13 +118,13 @@ check_exact = |text| {
 	match Semver.from_key(k.key) {
 		Ok(back) =>
 			if k.exact {
-				if back != v crash "from_key of the key of ${text} gives ${back.to_str()}" else {}
+				if (back != v) crash "from_key of the key of ${text} gives ${back.to_str()}" else {}
 			} else if !small or !v.pre_release().is_empty() or back != Semver.new(v.major(), v.minor(), v.patch()) {
 				crash "from_key of the key of ${text} (not exact) gives ${back.to_str()}"
 			} else {
 				{}
 			}
-		Err(NotExact) => if k.exact crash "exact key of ${text} gives NotExact" else {}
+		Err(NotExact) => if (k.exact) crash "exact key of ${text} gives NotExact" else {}
 	}
 }
 
@@ -140,14 +140,14 @@ check_key = |k| {
 			}
 			{}
 		}
-		Err(NotExact) => if want_ok crash "from_key(${show_u64(k)}) gives NotExact" else {}
+		Err(NotExact) => if (want_ok) crash "from_key(${show_u64(k)}) gives NotExact" else {}
 	}
 }
 
 test : Input -> Fuzz.Outcome
 test = |input| {
 	a = spec_at(input.bytes, 0)
-	b = if at(input.bytes, 20) % 2 == 0 near(a, input.bytes) else spec_at(input.bytes, 10)
+	b = if (at(input.bytes, 20) % 2 == 0) near(a, input.bytes) else spec_at(input.bytes, 10)
 	check_pair(text_of(a), text_of(b))
 	check_exact(text_of(a))
 	check_exact(text_of(b))

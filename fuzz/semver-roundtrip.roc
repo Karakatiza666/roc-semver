@@ -29,7 +29,7 @@ Input := { major : U64, minor : U64, patch : U64, pre : List(List(U8)), build : 
 ident : List(U8) -> Str
 ident = |codes| {
 	chars = codes.map(|c| alphabet.get(c.to_u64()) ?? '-')
-	if chars.is_empty() "0" else Str.from_utf8(chars) ?? "0"
+	if (chars.is_empty()) "0" else Str.from_utf8(chars) ?? "0"
 }
 
 ## A numeric pre-release identifier has no leading zero (semver 9): "007" becomes "1007"
@@ -38,15 +38,15 @@ pre_ident = |codes| {
 	s = ident(codes)
 	bytes = s.to_utf8()
 	all_digits = bytes.all(|b| b >= '0' and b <= '9')
-	if all_digits and bytes.len() > 1 and bytes.first() == Ok('0') "1${s}" else s
+	if (all_digits and bytes.len() > 1 and bytes.first() == Ok('0')) "1${s}" else s
 }
 
 text_of : Input -> Str
 text_of = |input| {
 	pre = input.pre.map(pre_ident)
 	build = input.build.map(ident)
-	pre_part = if pre.is_empty() "" else "-${Str.join_with(pre, ".")}"
-	build_part = if build.is_empty() "" else "+${Str.join_with(build, ".")}"
+	pre_part = if (pre.is_empty()) "" else "-${Str.join_with(pre, ".")}"
+	build_part = if (build.is_empty()) "" else "+${Str.join_with(build, ".")}"
 	"${input.major.to_str()}.${input.minor.to_str()}.${input.patch.to_str()}${pre_part}${build_part}"
 }
 

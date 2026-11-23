@@ -50,10 +50,10 @@ test = |input| {
 	v = (w(0), w(1), w(2))
 	(s1, s2, s3) = (m1.to_str(), m2.to_str(), m3.to_str())
 
-	upper3 = if m1 > 0 (m1 + 1, 0, 0) else if m2 > 0 (0, m2 + 1, 0) else (0, 0, m3 + 1)
+	upper3 = if (m1 > 0) (m1 + 1, 0, 0) else if (m2 > 0) (0, m2 + 1, 0) else (0, 0, m3 + 1)
 	check("^${s1}.${s2}.${s3}", (m1, m2, m3), upper3, v)
 
-	upper2 = if m1 > 0 (m1 + 1, 0, 0) else (0, m2 + 1, 0)
+	upper2 = if (m1 > 0) (m1 + 1, 0, 0) else (0, m2 + 1, 0)
 	check("^${s1}.${s2}", (m1, m2, 0), upper2, v)
 	check("${s1}.${s2}", (m1, m2, 0), upper2, v)
 	check("^${s1}.${s2}.x", (m1, m2, 0), upper2, v)

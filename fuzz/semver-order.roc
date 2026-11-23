@@ -31,8 +31,8 @@ small_text = |bytes, n| {
 	core = "${(b(0) % 3).to_str()}.${(b(1) % 3).to_str()}.${(b(2) % 3).to_str()}"
 	pre_count = (b(3) % 4).to_u64()
 	pre = [b(4), b(5), b(6)].take_first(pre_count).map(|i| pool.get((i % 10).to_u64()) ?? "alpha")
-	pre_part = if pre.is_empty() "" else "-${Str.join_with(pre, ".")}"
-	build_part = if b(7) % 2 == 0 "" else "+b${(b(8) % 3).to_str()}"
+	pre_part = if (pre.is_empty()) "" else "-${Str.join_with(pre, ".")}"
+	build_part = if (b(7) % 2 == 0) "" else "+b${(b(8) % 3).to_str()}"
 	"${core}${pre_part}${build_part}"
 }
 

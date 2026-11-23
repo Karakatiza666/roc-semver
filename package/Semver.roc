@@ -40,7 +40,7 @@ Semver :: {
 	)
 	parse = |text| {
 		(version, rest) = Semver.parse_lazy(text)?
-		if rest.is_empty() Ok(version) else Err(UnexpectedSuffix(rest))
+		if (rest.is_empty()) Ok(version) else Err(UnexpectedSuffix(rest))
 	}
 
 	## Reads a version at the start of the text, and gives the text after it.
@@ -75,8 +75,8 @@ Semver :: {
 	## The text form: `major.minor.patch`, then `-` and the pre-release identifiers, then `+` and the build identifiers.
 	to_str : Semver -> Str
 	to_str = |v| {
-		pre = if v.pre_release.is_empty() "" else "-${Str.join_with(v.pre_release, ".")}"
-		meta = if v.build.is_empty() "" else "+${Str.join_with(v.build, ".")}"
+		pre = if (v.pre_release.is_empty()) "" else "-${Str.join_with(v.pre_release, ".")}"
+		meta = if (v.build.is_empty()) "" else "+${Str.join_with(v.build, ".")}"
 		"${v.major.to_str()}.${v.minor.to_str()}.${v.patch.to_str()}${pre}${meta}"
 	}
 
@@ -98,7 +98,7 @@ Semver :: {
 		major_k = v.major.min(field_max)
 		minor_k = saturated_after(major_k, v.minor)
 		patch_k = saturated_after(minor_k, v.patch)
-		code = if patch_k == field_max field_max else pre_release_code(v.pre_release)
+		code = if (patch_k == field_max) field_max else pre_release_code(v.pre_release)
 		key = major_k.shl_wrap(48).bitwise_or(minor_k.shl_wrap(32)).bitwise_or(patch_k.shl_wrap(16)).bitwise_or(code)
 		{ key, exact: patch_k != field_max and v.pre_release.is_empty() and v.build.is_empty() }
 	}
@@ -142,7 +142,7 @@ field_max = 0xFFFF
 
 ## The field of a part. A part of `field_max` or more gives `field_max`, and so does each part after it.
 saturated_after : U64, U64 -> U64
-saturated_after = |previous, part| if previous == field_max field_max else part.min(field_max)
+saturated_after = |previous, part| if (previous == field_max) field_max else part.min(field_max)
 
 ## The 16-bit pre-release code of the key, from the first identifier (R-IK5):
 ## no pre-release `field_max`, numeric `0x0001 + min(n, 0x0FFE)`, other `0x1000 + 65 * rank(c1) + rank(c2)`.
